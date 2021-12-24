@@ -27,3 +27,11 @@ $ ./takeout-browser -folder /path/to/Takeout
 ```
 
 Then, head on to http://127.0.0.1:8080 to browse your pictures.
+
+## Building
+
+Requires Go 1.17.2 or newer.
+
+```
+$ go build -o takeout-browser cmd/main.go
+```
