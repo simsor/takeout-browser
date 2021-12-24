@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Google Takeout browser</title>
+    </head>
+    <body>
+        <h2>Folders</h2>
+        <ul>
+            {{ range .Folders }}
+            <li><a href="folder?f={{ .Name }}">{{ .Name }}</a></li>
+            {{ end }}
+        </ul>
+    </body>
+</html>

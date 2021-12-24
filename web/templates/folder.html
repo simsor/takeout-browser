@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Google Takeout browser</title>
+
+        <script src="static/js/jquery-3.6.0.js"></script>
+        <script src="static/js/jquery.nanogallery2.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="static/css/nanogallery2.min.css">
+        <link rel="stylesheet" type="text/css" href="static/css/nanogallery2.woff.min.css">
+    </head>
+    <body>
+        <h2>{{ .Folder.Name }}</h2>
+
+        <div id="nanogallery2" data-nanogallery2>
+            {{ range .Folder.Media }}
+            <a href="images/{{ .Title }}?f={{ $.Folder.Name }}" data-ngthumb="thumbs/{{ .Title }}?f={{ $.Folder.Name }}">{{ .Title }}</a>
+            {{ end }}
+        </div>
+    </body>
+</html>
