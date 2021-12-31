@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
+	"image/gif"
 	"image/jpeg"
 	"image/png"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -26,6 +28,7 @@ type Media struct {
 	path string
 }
 
+// OpenMedia opens a Google Photos Takeout media file, identified by its JSON metadata file.
 func OpenMedia(path string) (Media, error) {
 	m := Media{}
 	if !strings.HasSuffix(strings.ToLower(path), ".json") {
@@ -90,19 +93,30 @@ func (m Media) format() (Format, error) {
 		return FormatMP4, nil
 	}
 
+	if strings.HasSuffix(f, ".gif") {
+		return FormatGIF, nil
+	}
+
 	return "", fmt.Errorf("unknown file format")
 }
 
+// Thumbnail returns an image.Image representing the media, of size 300x300 pixels maximum.
 func (m Media) Thumbnail() (image.Image, error) {
-	if m.Format.IsVideo() {
-		return nil, fmt.Errorf("cannot generate thumbnails for videos yet")
-	}
 
 	f, err := os.Open(m.path)
 	if err != nil {
 		return nil, fmt.Errorf("open: %v", err)
 	}
 	defer f.Close()
+
+	if m.Format.IsVideo() {
+		data, err := firstFrame(f, 300, 300)
+		if err != nil {
+			return nil, err
+		}
+
+		return jpeg.Decode(bytes.NewReader(data))
+	}
 
 	var img image.Image
 
@@ -118,13 +132,18 @@ func (m Media) Thumbnail() (image.Image, error) {
 		}
 
 		img, err = jpeg.Decode(bytes.NewReader(data))
+	} else if m.Format == FormatGIF {
+		img, err = gif.Decode(f)
+	} else {
+		log.Printf("No handler for this media type: %s", m.Format)
+		return nil, fmt.Errorf("no handler for this media type: %s", m.Format)
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("error decoding image: %v", err)
+		return nil, fmt.Errorf("error decoding %s: %v", m.path, err)
 	}
 
-	return resize.Thumbnail(200, 200, img, resize.Bicubic), nil
+	return resize.Thumbnail(300, 300, img, resize.Bicubic), nil
 }
 
 // BrowserSafeMedia writes data to the Writer that *should* be understood by any modern browser
@@ -135,7 +154,7 @@ func (m Media) BrowserSafeMedia(w io.Writer) error {
 	}
 	defer f.Close()
 
-	if m.Format == FormatPNG || m.Format == FormatJPEG || m.Format == FormatMP4 {
+	if m.Format == FormatPNG || m.Format == FormatJPEG || m.Format == FormatMP4 || m.Format == FormatGIF {
 		io.Copy(w, f)
 	} else if m.Format == FormatHEIC {
 		conv, err := convert(f, "jpeg")
@@ -143,6 +162,13 @@ func (m Media) BrowserSafeMedia(w io.Writer) error {
 			return err
 		}
 		io.Copy(w, bytes.NewReader(conv))
+	} else if m.Format == FormatMOV {
+		r, err := ffmpeg(f, "h264")
+		if err != nil {
+			return err
+		}
+
+		io.Copy(w, r)
 	}
 
 	return nil

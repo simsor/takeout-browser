@@ -2,13 +2,41 @@
 <html lang="en">
     <head>
         <title>Google Takeout browser</title>
+
+        <link rel="stylesheet" type="text/css" href="/static/css/picnic.min.css">
+
+        <script src="static/js/jquery-3.6.0.js"></script>
+        <script src="static/js/jquery.nanogallery2.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="static/css/nanogallery2.min.css">
+        <link rel="stylesheet" type="text/css" href="static/css/nanogallery2.woff.min.css">
     </head>
     <body>
-        <h2>Folders</h2>
-        <ul>
+        <nav>
+            <a href="/" class="brand">
+                <span>Takeout Browser</span>
+            </a>
+
+            <div class="menu">
+                <a href="/folders" class="button icon-puzzle">All folders</a>
+            </div>
+        </nav>
+
+        <div id="nanogallery2" data-nanogallery2='{
+            "thumbnailWidth": 300,
+            "thumbnailHeight": 300,
+            "thumbnailDisplayOutsideScreen": false
+        }'>
             {{ range .Folders }}
-            <li><a href="folder?f={{ .Name }}">{{ .Name }}</a></li>
+            {{ $curFolder := . }}
+                {{ range .Media }}
+                {{ if .Format.IsVideo }}
+                    <a href="images/{{ $curFolder.Name }}/{{ .Title }}.mp4" data-ngthumb="thumbs/{{ .Title }}?f={{ $curFolder.Name }}">{{ .Title }}</a>
+                {{ else }}
+                    <a href="images/{{ $curFolder.Name }}/{{ .Title }}.mp4" data-ngthumb="thumbs/{{ .Title }}?f={{ $curFolder.Name }}">{{ .Title }}</a>
+                {{ end }}
+                {{ end }}
             {{ end }}
-        </ul>
+        </div>
     </body>
 </html>

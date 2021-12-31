@@ -12,7 +12,10 @@
     <body>
         <h2>{{ .Folder.Name }}</h2>
 
-        <div id="nanogallery2" data-nanogallery2>
+        <div id="nanogallery2" data-nanogallery2='{
+            "thumbnailWidth": 300,
+            "thumbnailHeight": 300
+        }'>
             {{ range .Folder.Media }}
             <a href="images/{{ .Title }}?f={{ $.Folder.Name }}" data-ngthumb="thumbs/{{ .Title }}?f={{ $.Folder.Name }}">{{ .Title }}</a>
             {{ end }}

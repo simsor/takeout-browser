@@ -7,13 +7,14 @@ var (
 	FormatPNG  Format = "PNG"
 	FormatJPEG Format = "JPEG"
 	FormatHEIC Format = "HEIC"
+	FormatGIF  Format = "GIF"
 
 	FormatMOV Format = "MOV"
 	FormatMP4 Format = "MP4"
 )
 
 func (f Format) IsPicture() bool {
-	return f == FormatPNG || f == FormatHEIC || f == FormatJPEG
+	return f == FormatPNG || f == FormatHEIC || f == FormatJPEG || f == FormatGIF
 }
 
 func (f Format) IsVideo() bool {
